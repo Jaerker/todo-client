@@ -1,35 +1,50 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-
+import { useEffect, useState } from 'react'
+import agent from '../utils/agent';
+import Task from './Components/Task/Task';
+import AddButton from './Components/Button/AddButton';
 function App() {
-  const [count, setCount] = useState(0)
+  const [tasks, setTasks] = useState([]);
+  const [addMode, setAddMode] = useState(false);
+
+
+  const handleCheckboxClicked = async (task) => {
+    task.done = !task.done;
+    await agent.tasks.update(task.sk, task);
+  }
+  const handleDeleteClicked = async (task) => {
+
+  }
+  const handleEditClicked = async (task) => {
+    console.log(`edit clicked in ${task.sk}`);
+  }
+  const handleAddToggle = async (data) => {
+    setAddMode(data);
+
+  }
+
+
+  useEffect(() => {
+    agent.tasks.getAll().then(listOfTasks => setTasks(listOfTasks));
+  }, [tasks]);
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+    <main className={`mx-5 min-w-56 h-dvh flex transition-all flex-col justify-center sm:justify-start ${addMode ? 'blur-sm' : ''} sm:mt-10 `}>
+      <ul className={`container min-w-list mx-auto w-4/5  my-5 divide-y  divide-gray-400 rounded-md overflow-hidden`}>
+      {tasks.map((task) => (
+        <Task 
+          key={task.sk} task={task} 
+          onCheckboxClicked={handleCheckboxClicked} 
+          onDeleteClicked={handleDeleteClicked}
+          onEditClicked={handleEditClicked} />
+        ))}
+      </ul>
+      <AddButton onClick={handleAddToggle}/>    
+    </main>
+      
+    
     </>
-  )
+  );
 }
 
 export default App
